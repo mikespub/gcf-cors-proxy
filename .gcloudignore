@@ -12,6 +12,7 @@
 # below:
 .git
 .gitignore
+.gitattributes
 
 node_modules
 #!include:.gitignore

@@ -1,5 +1,10 @@
 /**
  * Google Cloud Functions - Basic CORS Proxy to predefined HTTPS backend server
+ *
+ * See https://github.com/mikespub/gcf-cors-proxy for details
+ *
+ * Note: the current CORS proxy is configured to access the AWS Price List API backend
+ * See https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/using-ppslong.html
  */
 //https://cloud.google.com/functions/docs/bestpractices/networking
 const https = require('https');
@@ -10,7 +15,7 @@ const backend = 'pricing.us-east-1.amazonaws.com';
 //https://github.com/firebase/functions-samples/blob/master/quickstarts/time-server/functions/index.js
 // CORS Express middleware to enable CORS Requests.
 //const cors = require('cors')({
-//	origin: true,
+//	origin: '*',
 //});
 var cachedAgent = function cachedAgent(req, res) {
 	method = req.method || 'GET';
@@ -26,7 +31,7 @@ var cachedAgent = function cachedAgent(req, res) {
 	if (match) {
 		headers['If-None-Match'] = match;
 	}
-	console.log(method + ' ' + path);
+	console.log(method + ' ' + path + ' ' + req.ips);
 	reqInner = https.request({
 		hostname: backend,
 		port: 443,
@@ -39,7 +44,7 @@ var cachedAgent = function cachedAgent(req, res) {
 		resInner.setEncoding('utf8');
 		resInner.on('data', chunk => { rawData += chunk; });
 		resInner.on('end', () => {
-			//http://expressjs.com/en/4x/api.html#res
+			//https://expressjs.com/en/api.html#res
 			res.set('Access-Control-Allow-Origin', "*");
 			res.set('Access-Control-Allow-Methods', "GET, HEAD, OPTIONS");
 			res.set('Access-Control-Allow-Headers', "Origin, X-Requested-With, Content-Type, Accept");
@@ -48,22 +53,34 @@ var cachedAgent = function cachedAgent(req, res) {
 			res.set('Access-Control-Expose-Headers', 'Content-Length, ETag');
 			//res.status(200).send(`Data: ${rawData}`);
 			//if (method == 'HEAD') {
-			//  console.log(resInner.headers);
+			//	console.log(resInner.headers);
 			//}
 			//https://nodejs.org/api/http.html#http_class_http_serverresponse
-			console.log(resInner.statusCode + ' ' + resInner.statusMessage);
+			//console.log(resInner.statusCode + ' ' + resInner.statusMessage);
 			if (resInner.headers['content-length']) {
 				res.set('Content-Length', resInner.headers['content-length']);
-				console.log('Content-Length: ' + resInner.headers['content-length']);
+				//console.log('Content-Length: ' + resInner.headers['content-length']);
 			}
 			if (resInner.headers['etag']) {
 				res.set('ETag', resInner.headers['etag']);
-				console.log('ETag:' + resInner.headers['etag']);
+				//console.log('ETag:' + resInner.headers['etag']);
 			}
 			//https://cloud.google.com/functions/docs/writing/http
 			if (method == 'HEAD') {
 				res.status(resInner.statusCode).end();
 			} else {
+				if (path.endsWith('.csv')) {
+					// path is /offers/v1.0/aws/<service>/<version>/index.csv
+					// or /offers/v1.0/aws/<service>/<version>/<region>/index.csv
+					pieces = path.split('/');
+					//console.log(path + ' ' + pieces.length + ' ' + pieces);
+					if (pieces.length > 7) {
+						res.set('Content-Disposition', 'attachment; filename="' + pieces[4] + '.' + pieces[6] + '.csv"');
+					} else {
+						res.set('Content-Disposition', 'attachment; filename="' + pieces[4] + '.csv"');
+					}
+					res.set('Content-Type', 'application/octet-stream');
+				}
 				res.status(resInner.statusCode).send(rawData);
 			}
 		});
