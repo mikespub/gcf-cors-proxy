@@ -1,0 +1,7 @@
+{
+  "name": "corsAgent",
+  "version": "1.0.0",
+  "description": "CORS proxy agent",
+  "dependencies": {
+  }
+}
