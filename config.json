@@ -1,0 +1,17 @@
+{
+  "default": "aws",
+  "aws": {
+    "name": "aws-pricing",
+    "description": "AWS Price List API",
+    "backend": "pricing.us-east-1.amazonaws.com",
+    "path": "/offers/v1.0/aws/index.json",
+    "origin": "*"
+  },
+  "eos": {
+    "name": "fcsm-eos-api",
+    "description": "FCSM EOS API",
+    "backend": "emeia.fcsm.io",
+    "path": "/api/v1/analytics/summary",
+    "origin": "github.mikespub.net"
+  }
+}

@@ -10,7 +10,7 @@
 const https = require('https');
 const agent = new https.Agent({keepAlive: true});
 
-const backend = 'pricing.us-east-1.amazonaws.com';
+const config = require('./config.json')
 
 //https://github.com/firebase/functions-samples/blob/master/quickstarts/time-server/functions/index.js
 // CORS Express middleware to enable CORS Requests.
@@ -20,6 +20,10 @@ const backend = 'pricing.us-east-1.amazonaws.com';
 var cachedAgent = function cachedAgent(req, res) {
 	method = req.method || 'GET';
 	path = req.path || '/offers/v1.0/aws/index.json';
+	// TODO: choose proxy config based on path prefix?
+	proxy = config[config['default']]
+	backend = proxy.backend || 'pricing.us-east-1.amazonaws.com';
+	origin = proxy.origin || '*';
 	//If-Modified-Since: Sat, 05 May 2018 20:38:27 GMT
 	modified = req.get('If-Modified-Since');
 	//If-None-Match: "5e5d61fb71903f6b8f0123335154d11b"
@@ -31,7 +35,7 @@ var cachedAgent = function cachedAgent(req, res) {
 	if (match) {
 		headers['If-None-Match'] = match;
 	}
-	console.log(method + ' ' + path + ' ' + req.ips);
+	console.log(method + ' ' + path + ' ' + proxy.name + ' ' + req.ips);
 	reqInner = https.request({
 		hostname: backend,
 		port: 443,
@@ -45,7 +49,7 @@ var cachedAgent = function cachedAgent(req, res) {
 		resInner.on('data', chunk => { rawData += chunk; });
 		resInner.on('end', () => {
 			//https://expressjs.com/en/api.html#res
-			res.set('Access-Control-Allow-Origin', "*");
+			res.set('Access-Control-Allow-Origin', origin);
 			res.set('Access-Control-Allow-Methods', "GET, HEAD, OPTIONS");
 			res.set('Access-Control-Allow-Headers', "Origin, X-Requested-With, Content-Type, Accept");
 			// CHECKME: what about HEAD or GET 304? We need to expose Content-Length and ETag
