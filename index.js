@@ -24,6 +24,9 @@ var cachedAgent = function cachedAgent(req, res) {
 	proxy = config[config['default']]
 	backend = proxy.backend || 'pricing.us-east-1.amazonaws.com';
 	origin = proxy.origin || '*';
+	if (path == '/') {
+		path = proxy.path || '/offers/v1.0/aws/index.json';
+	}
 	//If-Modified-Since: Sat, 05 May 2018 20:38:27 GMT
 	modified = req.get('If-Modified-Since');
 	//If-None-Match: "5e5d61fb71903f6b8f0123335154d11b"
