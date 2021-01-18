@@ -1,6 +1,6 @@
 {
   "name": "gcf-cors-proxy",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "Basic CORS Proxy via Google Cloud Functions",
   "license": "Apache-2.0",
   "author": "mikespub",
