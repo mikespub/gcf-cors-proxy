@@ -19,7 +19,7 @@ See the Cloud Functions [Hello World tutorial][tutorial].
 See [Deploying Cloud Functions][deploying] using the gcloud tool from your [filesystem][filesystem] or [repository][repo]
 
 ```
-$ gcloud functions deploy corsAgent --trigger-http --runtime nodejs10 --allow-unauthenticated
+$ gcloud functions deploy corsAgent --trigger-http --runtime nodejs12 --allow-unauthenticated
 ```
 
 [deploying]: https://cloud.google.com/functions/docs/deploying/
