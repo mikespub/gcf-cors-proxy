@@ -8,5 +8,6 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/mikespub/gcf-cors-proxy.git"
-  }
+  },
+  "packageManager": "yarn@3.4.1"
 }
