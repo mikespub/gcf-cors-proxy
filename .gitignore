@@ -92,3 +92,5 @@ $RECYCLE.BIN/
 #!.yarn/releases
 #!.yarn/sdks
 #!.yarn/versions
+.yarnrc.yml
+yarn.lock
